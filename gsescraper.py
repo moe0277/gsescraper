@@ -28,6 +28,8 @@ CONFIG={} # holds config file information
 def configLogging(logfile):
     """
     Setup console and file logging
+    console level: debug
+    file lelvel: info
     """
     logging.basicConfig(filename=logfile, level=logging.INFO, format="[%(asctime)s] %(levelname)-8s %(message)s", datefmt='%H:%M:%S')
     console = logging.StreamHandler()
