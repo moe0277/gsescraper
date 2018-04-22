@@ -1,7 +1,7 @@
 '''
 Created on Apr 3, 2018
 
-@author: mkhan
+@author: moe0277
 '''
 import time
 import logging
@@ -12,25 +12,30 @@ from lib.xlsmodule import XLSModule
 class Environment(object):
     
     def __init__(self, name):
-        self.name = name
-        self.password = ""
-        self.status   = ""
-        self.recipelink = ""
-        self.esd = ""
-        self.execet = ""
-        self.execaet = ""
-        self.owner = ""
+        self.name = name        # name of this environment
+        self.password = ""      # password of this environment
+        self.status = ""        # status of this environment
+        self.recipe = ""        # last recipe
+        self.recipelink = ""    # recipe link for this environment
+        self.esd = ""           # start time of last recipe
+        self.execet = ""        # estimated execution time of last recipe
+        self.execaet = ""       # actual execution time of last recipe
+        self.owner1 = ""        # primary owner
+        self.owner2 = ""        # secondary owner
+        self.modestatus = ""    # launched mode 
         
     def __str__(self):
         mString = ""
-        mString += "Name: " + self.name
-        mString += "\nPassword: " + self.password
-        mString += "\nOwner: " + self.owner
-        mString += "\nStatus: " + self.status
-        mString += "\nRecipe Link: " + self.recipelink
-        mString += "\nRecipe Execution Start Date: " + self.esd
-        mString += "\nRecipe Estimated Compl Time: " + self.execet
-        mString += "\nRecipe Actual    Compl Time: " + self.execaet
+        mString += self.name + ", "
+        mString += self.password + ", "
+        mString += self.owner1 + ", "
+        mString += self.owner2 + ", "
+        mString += self.recipe + ", "
+        mString += self.status + ", "
+        mString += self.recipelink + ", "
+        mString += self.esd + ", "
+        mString += self.execet + ", "
+        mString += self.execaet
         return mString
         
 class GSEScraper(object):
@@ -47,16 +52,16 @@ class GSEScraper(object):
         self.username = username
         self.password = password
         self.envlist  = envlist
-        logging.debug(self.envlist)
+        logging.debug("Processing: "+str(self.envlist))
         
         self.envs = {}
         
         Browser = splinter.Browser
-        self.browser = Browser()    #default o
+        self.browser = Browser()
                 
         logging.info("Initialized scraper...")
     
-    def login(self):
+    def __login(self):
         if self.browser.is_element_present_by_id('sso_username', 60):
             iUsername = self.browser.find_by_id('sso_username')
         else:
@@ -82,7 +87,7 @@ class GSEScraper(object):
         logging.info("Submitting")
         iSubmit.click()
     
-    def getEnvLink(self):
+    def __getEnvLink(self):
         environments = []
         if self.browser.is_element_present_by_xpath('//*[@id="environments"]', 60):
             environments = self.browser.find_by_xpath('//*[@id="environments"]')
@@ -96,7 +101,7 @@ class GSEScraper(object):
             logging.error("cannot find element: xpath: '//*[@id=\"environments\"]'")
             raise
         
-    def getEnvBaseLink(self):
+    def __getEnvBaseLink(self):
         environments = []
         if self.browser.is_element_present_by_xpath("/html/body/form/div/div/table/tbody/tr/td[1]/section/div[2]/div/table/tbody[3]/tr/td/table/tbody/tr/td[4]/a", 60): #the next link i.e. pagination
             environments = self.browser.find_link_by_partial_text("ucm-gse")
@@ -112,12 +117,14 @@ class GSEScraper(object):
             logging.error("cannot find element: %s" % "/html/body/form/div/div/table/tbody/tr/td[1]/section/div[2]/div/table/tbody[3]/tr/td/table/tbody/tr/td[4]/a")
             raise
     
-    def visitEnvPage(self, envobj):
+    def __visitEnvPage(self, envobj):
         logging.info("Visiting Env: %s" % envobj.name)
         self.browser.visit(self.__URL__ + self.envbaselink + ":" +envobj.name)
         
-    def getEnvPass(self, envobj):
-        self.visitEnvPage(envobj)
+    def __getEnvStatus(self, envobj):
+        if self.browser.is_element_present_by_id("P15_RECIPE_DISPLAY", 60):
+            envrecipe = self.browser.find_by_id("P15_RECIPE_DISPLAY")
+            envobj.recipe = envrecipe.text
         if self.browser.is_element_present_by_id("P15_RECIPE_STATUS", 60):
             envstatus = self.browser.find_by_id("P15_RECIPE_STATUS")
             if "Failed" in envstatus.value:
@@ -127,8 +134,8 @@ class GSEScraper(object):
             else:
                 envstatusval = envstatus.value 
             envobj.status = envstatusval
-            if (envobj.status == "Running"):
-                return # dont get password
+            
+    def __getEnvPass(self, envobj):
         if self.browser.is_element_present_by_id("P15_ENVIRONMENT_AAI_PASSWORD", 60):
             envpass = self.browser.find_by_id("P15_ENVIRONMENT_AAI_PASSWORD")
             envobj.password = envpass.text
@@ -138,7 +145,7 @@ class GSEScraper(object):
             raise
         return envobj
     
-    def getExecStatus(self, envobj):
+    def __getExecStatus(self, envobj):
         if self.browser.is_element_present_by_id("P15_RECIPE_EXEC_ST_DISPLAY", 60):
             esd = self.browser.find_by_id("P15_RECIPE_EXEC_ST_DISPLAY")
             envobj.esd = esd.text
@@ -157,8 +164,19 @@ class GSEScraper(object):
         else:
             logging.error("cannot find element: \"P15_RECIPE_EXEC_A_ET_DISPLAY\"")
             raise
-        if envobj.status != "Completed": # live running env
-            return
+     
+    def __getOwners(self, envobj): 
+        if self.browser.is_element_present_by_id("P15_PRIMARY_OWNER", 60):
+            owner1 = self.browser.find_by_id("P15_PRIMARY_OWNER")
+            envobj.owner1 = owner1.text
+        if self.browser.is_element_present_by_id("P15_SECONDARY_OWNER", 60):
+            owner2 = self.browser.find_by_id("P15_SECONDARY_OWNER")
+            envobj.owner2 = owner2.text
+        else:
+            logging.error("cannot find element: \"P15_RECIPE_EXEC_ST_DISPLAY\"")
+            raise
+
+    def __getRecipeLink(self, envobj):
         if self.browser.is_element_present_by_text("Run DataSet Recipe", 60):
             recipeurl = self.browser.find_by_text("Run DataSet Recipe")
             recipeurlhtml = recipeurl.outer_html
@@ -169,24 +187,19 @@ class GSEScraper(object):
         else:
             logging.error("cannot find element: 'Run DataSet Recipe'")
             raise
-     
-    def getOwner(self, envobj): 
-        if self.browser.is_element_present_by_id("P15_PRIMARY_OWNER", 60):
-            owner = self.browser.find_by_id("P15_PRIMARY_OWNER")
-            envobj.owner = owner.text
-        else:
-            logging.error("cannot find element: \"P15_RECIPE_EXEC_ST_DISPLAY\"")
-            raise
         
     def getStatus(self):
         for env in self.envlist:
             envobj = Environment(env)
-            self.getEnvPass(envobj)
-            self.getExecStatus(envobj)
-            self.getOwner(envobj)
+            self.__visitEnvPage(envobj)
+            self.__getEnvStatus(envobj)
+            if (envobj.status != "Running"):
+                self.__getEnvPass(envobj)
+            self.__getExecStatus(envobj)
+            self.__getOwners(envobj)
             self.envs[env] = envobj
     
-    def runClean(self, envobj):
+    def __runClean(self, envobj):
         mUrl = self.__URL__ + envobj.recipelink
         logging.debug("Visiting recipe: %s" % mUrl)
         self.browser.visit(mUrl)
@@ -200,14 +213,14 @@ class GSEScraper(object):
                 confLaunchBtn = self.browser.find_by_xpath('//*[@id="B694724411644752651"]')
                 confLaunchBtn.click()
     
-    def retryClean(self, envobj):
+    def __retryClean(self, envobj):
         retrylink = self.browser.find_link_by_text("Retry Recipe Execution")
         retrylink.first.click()
         if self.browser.is_element_present_by_xpath('//*[@id="B453843285012723416"]', 60):
             confirmlink = self.browser.find_by_xpath('//*[@id="B453843285012723416"]')
             confirmlink.click()
 
-    def runPass(self, envobj):
+    def __runPass(self, envobj):
         mUrl = self.__URL__ + envobj.recipelink
         logging.debug("Visiting recipe: %s" % mUrl)
         self.browser.visit(mUrl)
@@ -221,7 +234,7 @@ class GSEScraper(object):
                 confLaunchBtn = self.browser.find_by_xpath('//*[@id="B694724411644752651"]')
                 confLaunchBtn.click()
     
-    def retryPass(self, envobj):
+    def __retryPass(self, envobj):            # retry if in failed mode
         retrylink = self.browser.find_link_by_text("Retry Recipe Execution")
         retrylink.first.click()
         if self.browser.is_element_present_by_id("P15_RETRY_RECIPE_1",20):
@@ -235,29 +248,41 @@ class GSEScraper(object):
                     confirmlink = self.browser.find_by_xpath('//*[@id="B453843285012723416"]')
                     confirmlink.click()
     
-    def envClean(self):
-        for envname, envobj in self.envs.items():
-            self.visitEnvPage(envobj)
+    def envClean(self):                     # clean (ucm-all) environments
+        for env in self.envlist:
+            envobj = Environment(env)
+            self.__visitEnvPage(envobj)
+            self.__getEnvStatus(envobj)
             if envobj.status == "Completed":
-                self.runClean(envobj)
-            if envobj.status == "Failed":
-                self.retryClean(envobj)
+                self.__getRecipeLink(envobj)
+                self.__runClean(envobj)
+                envobj.modestatus = "clean"
+            elif envobj.status == "Failed":
+                self.__retryClean(envobj)
+                envobj.modestatus = "clean"
+            self.envs[env] = envobj
     
-    def envPass(self):
-        for envname, envobj in self.envs.items():
-            self.visitEnvPage(envobj)
+    def envPass(self):                      # reset password of environments
+        for env in self.envlist:
+            envobj = Environment(env)
+            self.__visitEnvPage(envobj)
+            self.__getEnvStatus(envobj)
             if envobj.status == "Completed":
-                self.runPass(envobj)
-            if envobj.status == "Failed":
-                self.retryPass(envobj)   
+                self.__getRecipeLink(envobj)
+                self.__runPass(envobj)
+                envobj.modestatus = "passwordreset"
+            elif envobj.status == "Failed":
+                self.__retryPass(envobj)
+                envobj.modestatus = "passwordreset"
+            self.envs[env] = envobj
     
     def prep(self):
-        self.browser.visit(self.__URL__)
-        self.login()  
-        self.getEnvLink()
-        self.getEnvBaseLink()
+        self.browser.visit(self.__URL__)    # visit main sit
+        self.__login()                        # attempt login
+        self.__getEnvLink()                   # get url for environments tab
+        self.__getEnvBaseLink()               # get session info for environments
         
-    def writeXls(self, mfile):
+    def writeXls(self, mfile):              # write environments info to xls
         mxls = XLSModule(mfile, self.envs)
         mxls.process()
 

@@ -16,8 +16,8 @@ For the **status** mode, it also generates a *gsescraper.xlsx* file containing t
 
 ### Typical operation
 
-1. Run *gsescraper* in **status mode**. Review the status of the environments.  
-1. Run *gsescraper* in **clean mode**. (**NOTE:** you must have ownership of the environment(s) in order to run recipes. 
+1. Run *gsescraper* in **status mode**. Review the status of the environments in *gsescraper.xlsx*. 
+1. Run *gsescraper* in **clean mode**. **NOTE:** you must have ownership of the environment(s) in order to run recipes. 
 1. Run *gsescraper* in **passwordreset** mode if needed (normally, clean recipe will reset passwords as well) and this mode is not required. 
 
 The **clean**, and **passwordreset** modes can run against environments in both *Completed* and *Failed* states. 
@@ -35,10 +35,10 @@ Required python modules (use pip to install):
 ## Run instructions
 
 1. Create a *gsescraper.ini* file, for template see below or the *gsescraper.ini.sample* file.
-1. Ensure *gsescraper.xslsx* is not open / in use. 
+1. If mode=**status**, ensure *gsescraper.xslsx* is not open / in use. 
 1. Using Python 3, start *gsescraper.py* (launch from the same directory as rest of the codebase).
 1. During execution, do not interfere with the automated firefox window. However, you can work on other windows. 
-1. At the end of the execution - a new *gsescraper.xlsx* will be created. 
+1. If mode=**status**, at the end of the execution - a new *gsescraper.xlsx* will be created. 
 1. If needed, review the *gsescraper.py.log* file for runtime log. 
 
 ## .ini file format

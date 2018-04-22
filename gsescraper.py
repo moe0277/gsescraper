@@ -1,7 +1,7 @@
 '''
 Created on Apr 14, 2018
 
-@author: mkhan
+@author: moe0277
 @contact: moe.f.khan@oracle.com
 '''
 
@@ -43,18 +43,32 @@ def main():
     
     gses = GSEScraper(CONFIG['username'], CONFIG['password'], CONFIG['environments'])   
     gses.prep()
-    gses.getStatus()
-    logging.debug("Environments status:")
-    for k, v in gses.envs.items():
-        logging.debug(v)
-        
-    if CONFIG['mode'] == "clean":
+    
+    if CONFIG['mode'] == 'status':
+        logging.info("Mode: status")
+        gses.getStatus()
+        logging.debug("Environments status:")
+        for k, v in gses.envs.items():
+            logging.debug(v)        
+        logging.debug("Writing xls")   
+        gses.writeXls('gsescraper.xlsx')
+    elif CONFIG['mode'] == "clean":
+        logging.info("Mode: clean")
         gses.envClean()    
     elif CONFIG['mode'] == "passwordreset":
+        logging.info("Mode: passwordreset")
         gses.envPass()
     
-    logging.debug("Writing xls")   
-    gses.writeXls('gsescraper.xlsx')
-    
+    if CONFIG['mode'] != "status":
+        success = []
+        others = []
+        for k, v in gses.envs.items():
+            if v.modestatus:
+                success.append(k)
+            else:
+                others.append(k)
+        logging.info("Ran %s on: %s" % (CONFIG['mode'], str(success)))
+        logging.info("Skipped: %s" % str(others))
+        
 if __name__ == '__main__':
     main()
