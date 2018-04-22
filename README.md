@@ -14,6 +14,14 @@ It supports 3 modes:
 
 For the **status** mode, it also generates a *gsescraper.xlsx* file containing the results of the status scrape. 
 
+### Typical operation
+
+1. Run *gsescraper* in **status mode**. Review the status of the environments.  
+1. Run *gsescraper* in **clean mode**. (**NOTE:** you must have ownership of the environment(s) in order to run recipes. 
+1. Run *gsescraper* in **passwordreset** mode if needed (normally, clean recipe will reset passwords as well) and this mode is not required. 
+
+The **clean**, and **passwordreset** modes can run against environments in both *Completed* and *Failed* states. 
+ 
 ## Pre-requisites
 
 Python 3 (not tested with Python 2)    
