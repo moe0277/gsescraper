@@ -1,4 +1,4 @@
-# gsescraper notes
+# gsescraper
 
 ## Overview
 
