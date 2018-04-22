@@ -2,6 +2,8 @@
 Created on Apr 19, 2018
 
 @author: moe0277
+@copyright: Copyright (C) Oracle Corporation
+
 '''
 
 import xlsxwriter
@@ -39,7 +41,7 @@ class XLSModule(object):
 
     def __envRecord(self, envobj):  
         self.col = 0
-        self.worksheet.write(self.row, self.col, envobj.name)
+        self.worksheet.write(self.row, self.col, envobj.name[4:])
         self.col += 1
         self.worksheet.write(self.row, self.col, envobj.password)
         self.col += 1

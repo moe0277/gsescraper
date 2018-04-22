@@ -2,6 +2,8 @@
 Created on Apr 3, 2018
 
 @author: moe0277
+@copyright: Copyright (C) Oracle Corporation
+
 '''
 import time
 import logging
