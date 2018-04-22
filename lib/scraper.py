@@ -59,7 +59,7 @@ class GSEScraper(object):
         Browser = splinter.Browser
         self.browser = Browser()
                 
-        logging.info("Initialized scraper...")
+        logging.debug("Initialized scraper...")
     
     def __login(self):
         if self.browser.is_element_present_by_id('sso_username', 60):
@@ -78,13 +78,13 @@ class GSEScraper(object):
             logging.error("cannot find element: xpath: /html/body/div/div[3]/div[1]/form/div[2]/span/input")
             raise
         
-        logging.info("Entering username")
+        logging.debug("Entering username")
         iUsername.fill(self.username)
         
-        logging.info("Entering password")
+        logging.debug("Entering password")
         iPassword.fill(self.password)
 
-        logging.info("Submitting")
+        logging.("Submitting")
         iSubmit.click()
     
     def __getEnvLink(self):
@@ -118,7 +118,7 @@ class GSEScraper(object):
             raise
     
     def __visitEnvPage(self, envobj):
-        logging.info("Visiting Env: %s" % envobj.name)
+        logging.debug("Visiting Env: %s" % envobj.name)
         self.browser.visit(self.__URL__ + self.envbaselink + ":" +envobj.name)
         
     def __getEnvStatus(self, envobj):
@@ -139,7 +139,7 @@ class GSEScraper(object):
         if self.browser.is_element_present_by_id("P15_ENVIRONMENT_AAI_PASSWORD", 60):
             envpass = self.browser.find_by_id("P15_ENVIRONMENT_AAI_PASSWORD")
             envobj.password = envpass.text
-            logging.info("Pass: %s" % envpass.text)
+            logging.debug("Pass: %s" % envpass.text)
         else:
             logging.error("cannot find element: \"P15_ENVIRONMENT_AAI_PASSWORD\"")
             raise
@@ -277,6 +277,7 @@ class GSEScraper(object):
             self.envs[env] = envobj
     
     def prep(self):
+        
         self.browser.visit(self.__URL__)    # visit main sit
         self.__login()                        # attempt login
         self.__getEnvLink()                   # get url for environments tab
