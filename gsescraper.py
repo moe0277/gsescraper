@@ -44,11 +44,13 @@ def main():
     gses = GSEScraper(CONFIG['username'], CONFIG['password'], CONFIG['environments'])   
     gses.prep()
     gses.getStatus()
+    logging.debug("Environments status:")
     for k, v in gses.envs.items():
-        print(k, v)
+        logging.debug(v)
+        
     if CONFIG['mode'] == "clean":
-        gses.envClean()
-    if CONFIG['mode'] == "passwordreset":
+        gses.envClean()    
+    elif CONFIG['mode'] == "passwordreset":
         gses.envPass()
     
     logging.debug("Writing xls")   

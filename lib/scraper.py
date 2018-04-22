@@ -188,12 +188,12 @@ class GSEScraper(object):
     
     def runClean(self, envobj):
         mUrl = self.__URL__ + envobj.recipelink
-        logging.debug("Visitng recipe: %s" % mUrl)
+        logging.debug("Visiting recipe: %s" % mUrl)
         self.browser.visit(mUrl)
         if self.browser.is_element_present_by_xpath('//*[@id="B693598234623477311"]', 60):
             logging.debug("Selecting UCM Clean Environment Recipe")
             self.browser.choose('f01', '901')
-            logging.debug("StartiSng Recipe")
+            logging.debug("Starting Recipe")
             launchBtn = self.browser.find_by_xpath('//*[@id="B693598234623477311"]')
             launchBtn.click()
             if self.browser.is_element_present_by_xpath('//*[@id="B694724411644752651"]', 60): #confirmation button
@@ -206,6 +206,20 @@ class GSEScraper(object):
         if self.browser.is_element_present_by_xpath('//*[@id="B453843285012723416"]', 60):
             confirmlink = self.browser.find_by_xpath('//*[@id="B453843285012723416"]')
             confirmlink.click()
+
+    def runPass(self, envobj):
+        mUrl = self.__URL__ + envobj.recipelink
+        logging.debug("Visiting recipe: %s" % mUrl)
+        self.browser.visit(mUrl)
+        if self.browser.is_element_present_by_xpath('//*[@id="B693598234623477311"]', 60):
+            logging.debug("Selecting UCM - Passowrd Reset Recipe")
+            self.browser.choose('f01', '1082')
+            logging.debug("Starting Recipe")
+            launchBtn = self.browser.find_by_xpath('//*[@id="B693598234623477311"]')
+            launchBtn.click()
+            if self.browser.is_element_present_by_xpath('//*[@id="B694724411644752651"]', 60): #confirmation button
+                confLaunchBtn = self.browser.find_by_xpath('//*[@id="B694724411644752651"]')
+                confLaunchBtn.click()
     
     def retryPass(self, envobj):
         retrylink = self.browser.find_link_by_text("Retry Recipe Execution")
@@ -233,7 +247,7 @@ class GSEScraper(object):
         for envname, envobj in self.envs.items():
             self.visitEnvPage(envobj)
             if envobj.status == "Completed":
-                self.runClean(envobj)
+                self.runPass(envobj)
             if envobj.status == "Failed":
                 self.retryPass(envobj)   
     

@@ -2,20 +2,36 @@
 
 ## Overview
 
-gsecraper code connects to https://demo.oracle.com using a firefox driver 
+gsecraper automates operations on demo.oracle.com.  
+
+It connects to https://demo.oracle.com using a firefox driver.  
+
+It supports 3 modes:  
+
+1. **status**: scrapes the password, status, and other values for environments specified in the .ini file. 
+1. **clean**: runs the UCM Clean All recipe against the envrionments specified. 
+1. **passwordreset**: runs the UCM Password reset recipe against the environments specified.  
+
+For the **status** mode, it also generates a *gsescraper.xlsx* file containing the results of the status scrape. 
 
 ## Pre-requisites
 
-Python 3 (not tested with Python 2)  
+Python 3 (not tested with Python 2)    
+Only tested on Windows; should work on Mac OSX w/ modifications. 
 
 Required python modules (use pip to install):  
 
 1. splinter
 2. xlsxwriter
 
-## Launch instructions
+## Run instructions
 
-
+1. Create a *gsescraper.ini* file, for template see below or the *gsescraper.ini.sample* file.
+1. Ensure *gsescraper.xslsx* is not open / in use. 
+1. Using Python 3, start *gsescraper.py* (launch from the same directory as rest of the codebase).
+1. During execution, do not interfere with the automated firefox window. However, you can work on other windows. 
+1. At the end of the execution - a new *gsescraper.xlsx* will be created. 
+1. If needed, review the *gsescraper.py.log* file for runtime log. 
 
 ## .ini file format
 
@@ -32,4 +48,3 @@ username=moe.f.khan@oracle.com
 password=xxxyyyzzz  
 ;comma separated list of environments (suggestion: test 1 environment initally to ensure it is working)
 environments=ucm-gse000nnnnn,uvm-gse000nnnnn  
-
