@@ -3,6 +3,17 @@ Created on Apr 14, 2018
 
 @author: moe0277
 @contact: moe.f.khan@oracle.com
+@copyright: Copyright (C) Oracle Corporation
+
+gsescraper automates password scraping, cleaning, and password resetting of owned GSE environments.
+
+Pre-requisites:
+
+python modules:
+    1. xlsxwriter
+    2. splinter
+    
+For more information, see README.md
 '''
 
 from configparser  import ConfigParser
@@ -12,9 +23,12 @@ import logging
 import sys
 import os
 
-CONFIG={}
+CONFIG={} # holds config file information
 
-def configlogging(logfile):
+def configLogging(logfile):
+    """
+    Setup console and file logging
+    """
     logging.basicConfig(filename=logfile, level=logging.INFO, format="[%(asctime)s] %(levelname)-8s %(message)s", datefmt='%H:%M:%S')
     console = logging.StreamHandler()
     console.setLevel(logging.DEBUG)
@@ -24,7 +38,10 @@ def configlogging(logfile):
     
     logging.info('Starting..')
 
-def parseconfig(cfgfile):
+def parseConfig(cfgfile):
+    """
+    Populate the CONFIG variable with .ini content
+    """
     config = ConfigParser()
     config.read(cfgfile)
     CONFIG['username'] = config.get("common", "username")
@@ -37,10 +54,10 @@ def main():
     program_name_full = os.path.basename(sys.argv[0])
     program_name = os.path.splitext(program_name_full)[0]
  
-    configlogging(program_name + ".log")
+    configLogging(program_name + ".log")
     cfgfile="./%s.ini" % program_name
 
-    parseconfig(cfgfile)
+    parseConfig(cfgfile)
     
     gses = GSEScraper(CONFIG['username'], CONFIG['password'], CONFIG['environments'])   
     gses.prep()
