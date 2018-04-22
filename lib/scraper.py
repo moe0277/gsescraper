@@ -84,7 +84,7 @@ class GSEScraper(object):
         logging.debug("Entering password")
         iPassword.fill(self.password)
 
-        logging.("Submitting")
+        logging.debug("Submitting")
         iSubmit.click()
     
     def __getEnvLink(self):
