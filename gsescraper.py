@@ -2,10 +2,11 @@
 Created on Apr 14, 2018
 
 @author: mkhan
+@contact: moe.f.khan@oracle.com
 '''
 
-from configparser import ConfigParser
-from lib.scraper import GSEScraper
+from configparser  import ConfigParser
+from lib.scraper   import GSEScraper
 
 import logging
 import sys
@@ -29,7 +30,7 @@ def parseconfig(cfgfile):
     CONFIG['username'] = config.get("common", "username")
     CONFIG['password'] = config.get("common", "password")
     CONFIG['environments'] = tuple(config.get("common", "environments").split(","))
-
+    CONFIG['mode'] = config.get("common", "mode")
 
 def main():
     program_name_full = os.path.basename(sys.argv[0])
@@ -41,17 +42,17 @@ def main():
     parseconfig(cfgfile)
     
     gses = GSEScraper(CONFIG['username'], CONFIG['password'], CONFIG['environments'])   
-    print(CONFIG['environments'])
     gses.prep()
-    gses.getstatus()
-    for env in gses.envs:
-        if gses.envhash[env]["status"] == "Completed":
-            logging.info("Cleaning env: "+env)
-            gses.envclean(env)
-        else:
-            logging.info("Not cleaning env: "+env)
-
-    print(gses.envhash)
-
+    gses.getStatus()
+    for k, v in gses.envs.items():
+        print(k, v)
+    if CONFIG['mode'] == "clean":
+        gses.envClean()
+    if CONFIG['mode'] == "passwordreset":
+        gses.envPass()
+    
+    logging.debug("Writing xls")   
+    gses.writeXls('gsescraper.xlsx')
+    
 if __name__ == '__main__':
     main()
