@@ -133,6 +133,8 @@ class GSEScraper(object):
                 envstatusval = "Failed"
             elif "Running" in envstatus.value:
                 envstatusval = "Running"
+            elif "Requested" in envstatus.value:
+                envstatusval = "Requested"
             else:
                 envstatusval = envstatus.value 
             envobj.status = envstatusval
@@ -195,7 +197,7 @@ class GSEScraper(object):
             envobj = Environment(env)
             self.__visitEnvPage(envobj)
             self.__getEnvStatus(envobj)
-            if (envobj.status != "Running"):
+            if (envobj.status != "Running") and (envobj.status != "Requested"):
                 self.__getEnvPass(envobj)
             self.__getExecStatus(envobj)
             self.__getOwners(envobj)
