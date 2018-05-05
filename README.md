@@ -10,7 +10,7 @@ It supports 3 modes:
 
 1. **status**: scrapes the password, status, and other values for environments specified in the .ini file. 
 1. **clean**: runs the UCM Clean All recipe against the envrionments specified. 
-1. **passwordreset**: runs the UCM Password reset recipe against the environments specified.  
+1. **passwordreset**: (DEPRECATED) runs the UCM Password reset recipe against the environments specified.  
 
 For the **status** mode, it also generates a *gsescraper.xlsx* file containing the results of the status scrape. 
 
@@ -18,7 +18,7 @@ For the **status** mode, it also generates a *gsescraper.xlsx* file containing t
 
 1. Run *gsescraper* in **status mode**. Review the status of the environments in *gsescraper.xlsx*. 
 1. Run *gsescraper* in **clean mode**. **NOTE:** you must have ownership of the environment(s) in order to run recipes. 
-1. Run *gsescraper* in **passwordreset** mode if needed (normally, clean recipe will reset passwords as well) and this mode is not required. 
+1. Run *gsescraper* in (DEPRECATED) **passwordreset** mode if needed (normally, clean recipe will reset passwords as well) and this mode is not required. 
 
 The **clean**, and **passwordreset** modes can run against environments in both *Completed* and *Failed* states. 
  
@@ -47,13 +47,13 @@ Required python modules (use pip to install):
 ;mode 
 ;status        create xls w/ status (password, owner, and other information) of all envrionmements  
 ;clean         run the ucm clean all  script on all environments  
-;passwordreset run the ucm password reset script on all environments  
+;passwordreset (DEPRECATED) run the ucm password reset script on all environments  
 mode=status  
 ;mode=clean  
 ;mode=passwordreset  
-;username = oracle sso username
-username=moe.f.khan@oracle.com
+;username = oracle sso username  
+username=moe.f.khan@oracle.com  
 ;password = oracle sso password  
 password=xxxyyyzzz  
-;environments comma separated list of environments (suggestion: test 1 environment initally to ensure it is working)
+;environments comma separated list of environments (suggestion: test 1 environment initally to ensure it is working)  
 environments=ucm-gse000nnnnn,uvm-gse000nnnnn  
