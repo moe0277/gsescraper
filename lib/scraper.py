@@ -98,6 +98,7 @@ class GSEScraper(object):
             p = re.compile('href=\"(.*)\"\s*id=')
             g = p.search(envhtml)
             self.envlink = g.group(1)
+            logging.info("Envlink: "+self.envlink)
             self.browser.visit(self.__URL__ + self.envlink)
         else:
             logging.error("cannot find element: xpath: '//*[@id=\"environments\"]'")
@@ -115,6 +116,7 @@ class GSEScraper(object):
             envbases = envbaseraw.split(":")
             s = ":"
             self.envbaselink = s.join(envbases[:-1])
+            logging.info("EnvBaseLik: "+self.envbaselink)
         else:
             logging.error("cannot find element: %s" % "/html/body/form/div/div/table/tbody/tr/td[1]/section/div[2]/div/table/tbody[3]/tr/td/table/tbody/tr/td[4]/a")
             raise
@@ -181,13 +183,22 @@ class GSEScraper(object):
             raise
 
     def __getRecipeLink(self, envobj):
+        logging.info("getRecipeLink entered...")
         if self.browser.is_element_present_by_text("Run DataSet Recipe", 60):
-            recipeurl = self.browser.find_by_text("Run DataSet Recipe")
-            recipeurlhtml = recipeurl.outer_html
-            p = re.compile('href=\"(.*)\"\s*>')
-            g = p.search(recipeurlhtml)
-            recipelink = '/apex/' + g.group(1)
-            envobj.recipelink = recipelink
+            if self.browser.is_element_present_by_id("pInstance", 60):
+                pInstance = self.browser.find_by_id("pInstance")[0].value
+                P15_ID = self.browser.find_by_id("P15_INSTANCE_ID")[0].value
+                logging.info("pInstance: %s, P15_ID: %s" % (pInstance, P15_ID))
+                recipelink = self.envlink[:-2]+":104:"+pInstance+"::NO:104:P104_ENVIRONMENT_ID:"+P15_ID
+            #recipeurl = self.browser.find_by_text("Run DataSet Recipe")
+            #recipeurlhtml = recipeurl.outer_html
+            #p = re.compile('href=\"(.*)\"\s*>')
+            #g = p.search(recipeurlhtml)
+            #recipelink = '/apex/' + g.group(1)
+                envobj.recipelink = recipelink
+                logging.info("Recipelink: "+recipelink)
+            else:
+                logging.error("cannot find element: 'pInstance")
         else:
             logging.error("cannot find element: 'Run DataSet Recipe'")
             raise
@@ -253,16 +264,23 @@ class GSEScraper(object):
                     confirmlink.click()
     
     def envClean(self):                     # clean (ucm-all) environments
+        logging.info("Clean mode selected")
         for env in self.envlist:
+            logging.info("On env # "+env)
             envobj = Environment(env)
             self.__visitEnvPage(envobj)
+            logging.info("EnvPage complete")
             self.__getEnvStatus(envobj)
+            logging.info("EnvStatus complete")
             if envobj.status == "Completed":
                 self.__getRecipeLink(envobj)
+                logging.info("GetRecipeLink complete")
                 self.__runClean(envobj)
+                logging.info("runClean complete")
                 envobj.modestatus = "clean"
             elif envobj.status == "Failed":
                 self.__retryClean(envobj)
+                logging.info("retryClean complete")
                 envobj.modestatus = "clean"
             self.envs[env] = envobj
     
@@ -286,6 +304,7 @@ class GSEScraper(object):
         self.__login()                        # attempt login
         self.__getEnvLink()                   # get url for environments tab
         self.__getEnvBaseLink()               # get session info for environments
+        logging.info("Prep Complete")
         
     def writeXls(self, mfile):              # write environments info to xls
         mxls = XLSModule(mfile, self.envs)
