@@ -272,7 +272,8 @@ class GSEScraper(object):
             logging.info("EnvPage complete")
             self.__getEnvStatus(envobj)
             logging.info("EnvStatus complete")
-            if envobj.status == "Completed":
+            logging.info("Status: %s" % envobj.status)
+            if envobj.status == "Completed" or envobj.status == "Cancelled":
                 self.__getRecipeLink(envobj)
                 logging.info("GetRecipeLink complete")
                 self.__runClean(envobj)
